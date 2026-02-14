@@ -95,14 +95,29 @@ init() {
     mount
 }
 
+# Watch for the view to be unmounted by gocryptfs then perform cleanup
+watch_unmount() {
+    inotifywait -m -e unmount "$view" |
+    while read path action file; do
+        echo "Detected unmount due to idle!"
+        rm -rf "$view"
+        # kill the parent script
+        pkill -P $$  
+    done
+}
+
 # Mount encrypted directory with a decrypted view
 mount() {
+    idle=10
     # Remake view incase in the case of unmount ran first
     if [[ ! -d "$view" ]]; then
         mkdir -p "$view"
     fi
-    gocryptfs $dir $view
-    echo "Mounted $dir with $view view"
+    gocryptfs -idle "${idle}s" $dir $view    
+
+    echo -e "Mounted $dir with $view view.\nThe view will automatically unmount after $idle seconds."
+
+    watch_unmount
 }
 
 # Unmount decrypted view
