@@ -108,7 +108,7 @@ watch_unmount() {
 
 # Mount encrypted directory with a decrypted view
 mount() {
-    idle=10
+    idle=600
     # Remake view incase in the case of unmount ran first
     if [[ ! -d "$view" ]]; then
         mkdir -p "$view"
